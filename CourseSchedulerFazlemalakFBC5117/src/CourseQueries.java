@@ -13,6 +13,8 @@ public class CourseQueries {
     private static Connection connection;
     private static PreparedStatement addCourse;
     private static PreparedStatement getCourseList;
+    private static PreparedStatement dropCourseList;
+    private static PreparedStatement dropClassList;
     private static ResultSet resultSet;
 
     public static void addCourse(CourseEntry course)
@@ -76,5 +78,38 @@ public class CourseQueries {
             sqlException.printStackTrace();
         }
         return courses;
+    }
+     
+     public static void dropCourse(String semester, String courseCode)
+    {
+        connection = DBConnection.getConnection();
+        try
+        {
+            dropCourseList = connection.prepareStatement("DELETE from app.class where SEMESTER = ? "
+                    + "and COURSECODE = ?");
+            dropClassList = connection.prepareStatement("DELETE from app.course where COURSECODE = ?");
+            dropCourseList.setString(1, semester);
+            dropCourseList.setString(2, courseCode);
+            dropCourseList.executeUpdate();
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+    }
+     
+     public static void dropClass(String courseCode)
+    {
+        connection = DBConnection.getConnection();
+        try
+        {
+            dropClassList = connection.prepareStatement("DELETE from app.course where COURSECODE = ?");
+            dropClassList.setString(1, courseCode);
+            dropClassList.executeUpdate();
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
     }
 }

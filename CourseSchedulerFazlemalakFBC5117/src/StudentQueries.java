@@ -50,7 +50,8 @@ public class StudentQueries {
             return null;
         }
     }
-         public static ArrayList<StudentEntry> getAllStudents()
+    
+    public static ArrayList<StudentEntry> getAllStudents()
     {
         ArrayList<StudentEntry> faculty = new ArrayList<StudentEntry>();
         connection = DBConnection.getConnection();
@@ -71,5 +72,20 @@ public class StudentQueries {
             
         }
         return faculty;
+    }
+    
+    public static void dropStudent(String studentID)
+    {
+        connection = DBConnection.getConnection();
+        try
+        {
+            getAllStudents = connection.prepareStatement("delete from app.student where studentid = ?");
+            getAllStudents.setString(1, studentID);
+            getAllStudents.executeUpdate();
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
     }
 }

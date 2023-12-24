@@ -15,6 +15,7 @@ public class ScheduleQueries {
     private static PreparedStatement addScheduleEntry;
     private static PreparedStatement getScheduleByStudent;
     private static ResultSet resultSet;
+    private static PreparedStatement getScheduleClassList;
 
     public static void addScheduleEntry(ScheduleEntry entry)
     {
@@ -112,5 +113,104 @@ public class ScheduleQueries {
             sqlException.printStackTrace();
         }
         return retList;
+    }
+    
+    public static ArrayList<ScheduleEntry> getWaitlistedStudentsByCourse(String semester, String courseCode)
+    {
+        connection = DBConnection.getConnection();
+        ArrayList<ScheduleEntry> retList = new ArrayList<ScheduleEntry>();
+        try
+        {
+            getScheduleByStudent = connection.prepareStatement("select studentid, timestamp from app.schedule where semester = ? and courseCode = ? and status = ? order by timestamp");
+            getScheduleByStudent.setString(1, semester);
+            getScheduleByStudent.setString(2, courseCode);
+            getScheduleByStudent.setString(3, "w");
+            resultSet = getScheduleByStudent.executeQuery();
+            
+            while(resultSet.next())
+            {
+                retList.add(new ScheduleEntry(semester, courseCode, resultSet.getString(1), "w", resultSet.getTimestamp(2)));
+            }
+            
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+        return retList;
+    }
+    
+    public static void dropScheduleByCourse(String semester, String courseCode)
+    {
+        connection = DBConnection.getConnection();
+        try
+        {
+            getScheduleByStudent = connection.prepareStatement("delete from app.schedule where semester = ? and coursecode = ?");
+            getScheduleByStudent.setString(1, semester);
+            getScheduleByStudent.setString(2, courseCode);
+            getScheduleByStudent.executeUpdate();
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+    }
+    
+    public static void dropStudentScheduleByCourse(String semester, String studentID, String courseCode)
+    {
+        connection = DBConnection.getConnection();
+        try
+        {
+            getScheduleByStudent = connection.prepareStatement("delete from app.schedule where semester = ? and "
+                    + "studentid = ? and coursecode = ?");
+            
+            getScheduleByStudent.setString(1, semester);
+            getScheduleByStudent.setString(2, studentID);
+            getScheduleByStudent.setString(3, courseCode);
+            getScheduleByStudent.executeUpdate();
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+    }
+    
+    public static void updateScheduleEntry(String semester, ScheduleEntry entry)
+    {
+        connection = DBConnection.getConnection();
+        try
+        {
+            getScheduleByStudent = connection.prepareStatement("update app.schedule set status = 's' where semester = ? and studentid = ? and coursecode = ?");
+            getScheduleByStudent.setString(1, semester);
+            getScheduleByStudent.setString(2, entry.getStudentID());
+            getScheduleByStudent.setString(3, entry.getCourseCode());
+            getScheduleByStudent.executeUpdate();
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+    }
+    
+    public static ArrayList<String> getAllScheduledClassCodes(String semester)
+    {
+        connection = DBConnection.getConnection();
+        ArrayList<String> courseCodes = new ArrayList<String>();
+        try
+        {
+            getScheduleClassList = connection.prepareStatement("SELECT DISTINCT coursecode FROM app.schedule where semester = ?");
+            getScheduleClassList.setString(1, semester);
+            resultSet = getScheduleClassList.executeQuery();
+            
+            while(resultSet.next())
+            {
+                courseCodes.add(resultSet.getString(1));
+            }
+        }
+        catch(SQLException sqlException)
+        {
+            sqlException.printStackTrace();
+        }
+        return courseCodes;
     }
 }
